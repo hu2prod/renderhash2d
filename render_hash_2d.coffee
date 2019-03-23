@@ -166,5 +166,5 @@ kernel_local_size = null
 
 @dump_img = ()->
   options = { colorType: 6 } # RGBA
-  buffer = PNG.sync.write {data:image_buf_host, width:1920*2, height:1080*2}, options
+  buffer = PNG.sync.write {data:image_buf_host, width:image_size_x, height:image_size_y}, options
   fs.writeFileSync 'result.png', buffer
