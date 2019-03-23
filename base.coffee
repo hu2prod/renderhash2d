@@ -123,8 +123,8 @@ hash = (msg_buf, cb)->
   # debug
   rect_list = [
     {
-      x:0
-      y:0
+      x:10
+      y:20
       w:300
       h:300
       t:0
@@ -132,11 +132,11 @@ hash = (msg_buf, cb)->
   ] 
   for rect,idx in rect_list
     rect_offset = idx*8*4
-    rect_list_buf_host.writeInt32BE(rect.x, rect_offset); rect_offset += 4
-    rect_list_buf_host.writeInt32BE(rect.y, rect_offset); rect_offset += 4
-    rect_list_buf_host.writeInt32BE(rect.w, rect_offset); rect_offset += 4
-    rect_list_buf_host.writeInt32BE(rect.h, rect_offset); rect_offset += 4
-    rect_list_buf_host.writeInt32BE(rect.t, rect_offset); rect_offset += 4
+    rect_list_buf_host.writeInt32LE(rect.x, rect_offset); rect_offset += 4
+    rect_list_buf_host.writeInt32LE(rect.y, rect_offset); rect_offset += 4
+    rect_list_buf_host.writeInt32LE(rect.w, rect_offset); rect_offset += 4
+    rect_list_buf_host.writeInt32LE(rect.h, rect_offset); rect_offset += 4
+    rect_list_buf_host.writeInt32LE(rect.t, rect_offset); rect_offset += 4
   
   queue.enqueueWriteBuffer rect_list_buf_gpu, 0, rect_list_buf_size, rect_list_buf_host
 
