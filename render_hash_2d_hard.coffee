@@ -104,11 +104,16 @@ kernel_local_size = null
 ####################################################################################################
 @hash = (msg_buf, cb)->
   # TODO lock
-  scene_seed = crypto.createHash('sha256').update(msg_buf).digest()
+  msg_buf1 = Buffer.alloc msg_buf.length + 4
+  for i in msg_buf.length
+    msg_buf1[i+4] = msg_buf[i]
+  
   
   offset = 0
   rect_list = []
   for i in [0 ... rect_count]
+    msg_buf1.writeInt32LE i, 0
+    scene_seed = crypto.createHash('sha256').update(msg_buf1).digest()
     rect_list.push {
       x : scene_seed[offset++ % scene_seed.length] * scale_x
       y : scene_seed[offset++ % scene_seed.length] * scale_y
