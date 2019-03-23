@@ -1,7 +1,7 @@
 __kernel void draw_call_rect_list(
 	__global int *rect_list,
-	__global int4 *image_atlas,
-	__global int4 *image_result,
+	__global char4 *image_atlas,
+	__global char4 *image_result,
 	const unsigned int rect_list_length,
 	const unsigned int size_x,
 	const unsigned int tex_size_x
@@ -16,10 +16,14 @@ __kernel void draw_call_rect_list(
 	int rect_id = -1;
 	for(i = 0;i < rect_list_length;i++){
 		int offset = i*8;
-		int rect_x = rect_list[offset  ];
-		int rect_y = rect_list[offset+1];
-		int rect_w = rect_list[offset+2];
-		int rect_h = rect_list[offset+3];
+		// int rect_x = rect_list[offset  ];
+		// int rect_y = rect_list[offset+1];
+		// int rect_w = rect_list[offset+2];
+		// int rect_h = rect_list[offset+3];
+		int rect_x = 0;
+		int rect_y = 0;
+		int rect_w = 300;
+		int rect_h = 300;
 		
 		bool fit_x = x >= rect_x && x < rect_x + rect_w;
 		bool fit_y = y >= rect_y && y < rect_y + rect_h;
@@ -30,16 +34,20 @@ __kernel void draw_call_rect_list(
 		image_result[id].x = 0;
 		image_result[id].y = 0;
 		image_result[id].z = 0;
-		image_result[id].w = 0;
+		image_result[id].w = 255;
 		return;
 	}
-	int rect_x = rect_list[rect_id  ];
-	int rect_y = rect_list[rect_id+1];
-	int rect_tex_idx = rect_list[rect_id+4];
+	// int rect_x = rect_list[rect_id  ];
+	// int rect_y = rect_list[rect_id+1];
+	int rect_x = 0;
+	int rect_y = 0;
+	// int rect_tex_idx = rect_list[rect_id+4];
+	int rect_tex_idx = 0;
 	
 	int tex_offset_x = x - rect_x;
 	int tex_offset_y = y - rect_y;
-	int tex_offset = tex_offset_x + tex_offset_y*tex_size_x;
+	// int tex_offset = tex_offset_x + tex_offset_y*tex_size_x;
+	int tex_offset = tex_offset_x + tex_offset_y*300;
 	
 	image_result[id] = image_atlas[tex_offset];
 }
