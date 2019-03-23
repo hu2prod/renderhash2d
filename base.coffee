@@ -10,6 +10,7 @@ nooocl = require 'nooocl'
 } = nooocl
 crypto = require 'crypto'
 fs = require 'fs'
+{PNG} = require 'pngjs'
 
 ####################################################################################################
 # config
@@ -20,6 +21,8 @@ image_size_y = 1080*2
 tex_size_x = 300
 tex_size_y = 300
 tex_count = 1
+####################################################################################################
+# gpu
 ####################################################################################################
 
 host = CLHost.createV11()
@@ -41,17 +44,32 @@ p "device: #{gpu.name} #{gpu.platform.name}"
 ctx = new CLContext gpu
 
 queue = new CLCommandQueue ctx, gpu
+####################################################################################################
+# buffers
+####################################################################################################
+
+rect_list_buf_size = 1000*8*4
+rect_list_buf_host = Buffer.alloc rect_list_buf_size
+rect_list_buf_gpu  = new CLBuffer ctx, defs.CL_MEM_READ_ONLY, rect_list_buf_size
 
 image_size_byte = image_size_x*image_size_y*4
 image_buf_host = Buffer.alloc image_size_byte
 #image_buf_gpu  = new CLBuffer ctx, defs.CL_MEM_READ_WRITE, image_size_byte
 image_buf_gpu  = new CLBuffer ctx, defs.CL_MEM_WRITE_ONLY, image_size_byte
 
-rect_list_buf_size = 1000*8*4
-rect_list_buf_host = Buffer.alloc rect_list_buf_size
-rect_list_buf_gpu  = new CLBuffer ctx, defs.CL_MEM_READ_ONLY, rect_list_buf_size
+png_data = fs.readFileSync './tex/index.png'
+png = PNG.sync.read png_data
+tex_size_bytes = tex_size_x*tex_size_y*4*tex_count
+image_atlas_buf_gpu  = new CLBuffer ctx, defs.CL_MEM_WRITE_ONLY, tex_size_bytes
 
+
+
+# TODO tex atlas
+# TODO move tex atlas to gpu
+####################################################################################################
 # kernel
+####################################################################################################
+
 program = ctx.createProgram fs.readFileSync "./kernel.cl", 'utf-8'
 await program.build('').then defer()
 build_status = program.getBuildStatus gpu
@@ -63,8 +81,9 @@ kernel_global_size = new NDRange image_size_x*image_size_y
 kernel_local_size  = new NDRange 32
 
 
-# TODO tex atlas
-# TODO move tex atlas to gpu
+####################################################################################################
+# hash
+####################################################################################################
 
 hash = (msg_buf, cb)->
   # TODO lock
@@ -78,7 +97,7 @@ hash = (msg_buf, cb)->
       y : scene_seed[offset++ % scene_seed.length]
       w : scene_seed[offset++ % scene_seed.length]
       h : scene_seed[offset++ % scene_seed.length]
-      t : scene_seed[offset++ % scene_seed.length]
+      t : scene_seed[offset++ % scene_seed.length] % tex_count
     }
   
   for rect,idx in rect_list
@@ -103,6 +122,9 @@ hash = (msg_buf, cb)->
   # call kernel
   # move image to host
   cb null, crypto.createHash('sha256').update(image_buf_host).digest()
+####################################################################################################
+# test
+####################################################################################################
 
 msg = Buffer.alloc 80
 for i in [0 ... 80]
