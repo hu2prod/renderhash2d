@@ -20,6 +20,9 @@ image_size_y = 1080*2
 
 tex_size_x = 300
 tex_size_y = 300
+
+scale_x = Math.floor image_size_x/255
+scale_y = Math.floor image_size_y/255
 ####################################################################################################
 # gpu
 ####################################################################################################
@@ -114,22 +117,14 @@ hash = (msg_buf, cb)->
   rect_list = []
   for i in [0 ... 4]
     rect_list.push {
-      x : scene_seed[offset++ % scene_seed.length]
-      y : scene_seed[offset++ % scene_seed.length]
-      w : scene_seed[offset++ % scene_seed.length]
-      h : scene_seed[offset++ % scene_seed.length]
+      x : scene_seed[offset++ % scene_seed.length] * scale_x
+      y : scene_seed[offset++ % scene_seed.length] * scale_y
+      w : scene_seed[offset++ % scene_seed.length] * scale_x
+      h : scene_seed[offset++ % scene_seed.length] * scale_y
       t : scene_seed[offset++ % scene_seed.length] % tex_count
     }
-  # debug
-  rect_list = [
-    {
-      x:10
-      y:20
-      w:300
-      h:300
-      t:0
-    }
-  ] 
+  
+  p rect_list
   for rect,idx in rect_list
     rect_offset = idx*8*4
     rect_list_buf_host.writeInt32LE(rect.x, rect_offset); rect_offset += 4
@@ -146,6 +141,7 @@ hash = (msg_buf, cb)->
   kernel_draw_call_rect_list.setArg 3, rect_list.length, "uint"
   kernel_draw_call_rect_list.setArg 4, image_size_x, "uint"
   kernel_draw_call_rect_list.setArg 5, tex_size_x, "uint"
+  kernel_draw_call_rect_list.setArg 6, tex_size_y, "uint"
 
   queue.enqueueNDRangeKernel kernel_draw_call_rect_list, kernel_global_size, kernel_local_size
 

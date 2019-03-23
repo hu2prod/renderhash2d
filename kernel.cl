@@ -4,7 +4,8 @@ __kernel void draw_call_rect_list(
 	__global char4 *image_result,
 	const unsigned int rect_list_length,
 	const unsigned int size_x,
-	const unsigned int tex_size_x
+	const unsigned int tex_size_x,
+	const unsigned int tex_size_y
 	)
 {
 	// per pixel shader
@@ -18,12 +19,8 @@ __kernel void draw_call_rect_list(
 		int offset = i*8;
 		int rect_x = rect_list[offset  ];
 		int rect_y = rect_list[offset+1];
-		// int rect_w = rect_list[offset+2];
-		// int rect_h = rect_list[offset+3];
-		// int rect_x = 0;
-		// int rect_y = 0;
-		int rect_w = 300;
-		int rect_h = 300;
+		int rect_w = rect_list[offset+2];
+		int rect_h = rect_list[offset+3];
 		
 		bool fit_x = x >= rect_x && x < rect_x + rect_w;
 		bool fit_y = y >= rect_y && y < rect_y + rect_h;
@@ -31,22 +28,21 @@ __kernel void draw_call_rect_list(
 	}
 	
 	if (rect_id == -1) {
-		image_result[id].x = 0;
-		image_result[id].y = 0;
-		image_result[id].z = 0;
+		image_result[id].x = 128;
+		image_result[id].y = 128;
+		image_result[id].z = 128;
 		image_result[id].w = 255;
 		return;
 	}
-	int rect_x = rect_list[rect_id  ];
-	int rect_y = rect_list[rect_id+1];
-	//int rect_x = 0;
-	//int rect_y = 0;
-	// int rect_tex_idx = rect_list[rect_id+4];
-	int rect_tex_idx = 0;
+	int rect_offset = 8*rect_id;
+	int rect_x = rect_list[rect_offset  ];
+	int rect_y = rect_list[rect_offset+1];
+	int rect_tex_idx = rect_list[rect_offset+4];
 	
-	int tex_offset_x = x - rect_x;
-	int tex_offset_y = y - rect_y;
+	int tex_offset_x = (x - rect_x) % tex_size_x;
+	int tex_offset_y = (y - rect_y) % tex_size_y;
 	int tex_offset = tex_offset_x + tex_offset_y*tex_size_x;
-	
+	tex_offset += rect_tex_idx * tex_size_x * tex_size_y;
+
 	image_result[id] = image_atlas[tex_offset];
 }
