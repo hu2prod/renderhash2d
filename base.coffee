@@ -1,6 +1,6 @@
 #!/usr/bin/env iced
 
-hash_fn = require('./render_hash_2d')
+hash_fn = require('./render_hash_2d_hard')
 
 await hash_fn.init defer(err); throw err if err
 

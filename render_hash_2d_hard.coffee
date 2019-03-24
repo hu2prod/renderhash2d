@@ -15,19 +15,21 @@ fs = require 'fs'
 ####################################################################################################
 # config
 ####################################################################################################
-image_size_x = 1920*2
-image_size_y = 1080*2
+image_size_x = 1920
+image_size_y = 1080
 image_size_byte = image_size_x*image_size_y*4
 
 tex_size_x = 1920
 tex_size_y = 1080
 
-rect_count = 6
+rect_count = 256
 
 scale_x = Math.floor image_size_x/255
 scale_y = Math.floor image_size_y/255
+#scale_x = 1
+#scale_y = 1
 
-rect_list_buf_size = 1000*8*4
+rect_list_buf_size = rect_count*8*4
 
 rect_list_buf_gpu = null
 rect_list_buf_host = null
@@ -38,7 +40,9 @@ tex_count = null
 queue = null
 kernel_draw_call_rect_list = null
 kernel_global_size = null
-kernel_local_size = null 
+kernel_local_size = null
+file_list = null
+tex_buf_host = null
 
 ####################################################################################################
 # gpu
@@ -71,45 +75,20 @@ kernel_local_size = null
   rect_list_buf_gpu  = new CLBuffer ctx, defs.CL_MEM_READ_ONLY, rect_list_buf_size
 
   image_buf_host = Buffer.alloc image_size_byte
-  #image_buf_gpu  = new CLBuffer ctx, defs.CL_MEM_READ_WRITE, image_size_byte
-  image_buf_gpu  = new CLBuffer ctx, defs.CL_MEM_WRITE_ONLY, image_size_byte
+  image_buf_gpu  = new CLBuffer ctx, defs.CL_MEM_READ_WRITE, image_size_byte
 
-  file_list = fs.readdirSync('./tex')
+  file_list = fs.readdirSync('./tex_hard')
   tex_count = file_list.length
   tex_size_bytes = tex_size_x*tex_size_y*4*tex_count
 
   tex_buf_host = Buffer.alloc tex_size_x*tex_size_y*4
   image_atlas_buf_gpu  = new CLBuffer ctx, defs.CL_MEM_WRITE_ONLY, tex_size_bytes
-
-  tex_offset = 0
-  for file in file_list
-    p file
-    full_file = "./tex/#{file}"
-    png_data = PNG.sync.read fs.readFileSync full_file
-    {
-      data
-      width
-      height
-    } = png_data
-    for x in [0 ... tex_size_x]
-      for y in [0 ... tex_size_y]
-        src_offset = 4*(x + y*width)
-        dst_offset = 4*(x + y*tex_size_x)
-        tex_buf_host[dst_offset+0] = data[src_offset+0]
-        tex_buf_host[dst_offset+1] = data[src_offset+1]
-        tex_buf_host[dst_offset+2] = data[src_offset+2]
-        tex_buf_host[dst_offset+3] = 255
-
-    await queue.waitable().enqueueWriteBuffer(image_atlas_buf_gpu, tex_offset, tex_buf_host.length, tex_buf_host).promise.then defer()
-    tex_offset += tex_buf_host.length
-
-  # TODO tex atlas
-  # TODO move tex atlas to gpu
+  
   ####################################################################################################
   # kernel
   ####################################################################################################
 
-  program = ctx.createProgram fs.readFileSync "./kernel.cl", 'utf-8'
+  program = ctx.createProgram fs.readFileSync "./kernel_hard.cl", 'utf-8'
   await program.build('').then defer()
   build_status = program.getBuildStatus gpu
   p program.getBuildLog gpu
@@ -127,19 +106,57 @@ kernel_local_size = null
 ####################################################################################################
 @hash = (msg_buf, cb)->
   # TODO lock
-  scene_seed = crypto.createHash('sha256').update(msg_buf).digest()
+  msg_buf1 = Buffer.alloc msg_buf.length + 4
+  for i in msg_buf.length
+    msg_buf1[i+4] = msg_buf[i]
+  
   
   offset = 0
   rect_list = []
   for i in [0 ... rect_count]
+    msg_buf1.writeInt32LE i, 0
+    scene_seed = crypto.createHash('sha256').update(msg_buf1).digest()
     rect_list.push {
-      x : scene_seed[offset++ % scene_seed.length] * scale_x
-      y : scene_seed[offset++ % scene_seed.length] * scale_y
+      x : scene_seed[offset++ % scene_seed.length]
+      y : scene_seed[offset++ % scene_seed.length]
       w : scene_seed[offset++ % scene_seed.length] * scale_x
       h : scene_seed[offset++ % scene_seed.length] * scale_y
       t : scene_seed[offset++ % scene_seed.length] % tex_count
     }
   
+  t_idx = 0
+  t_hash = {}
+  selected_file_list = []
+  for rect in rect_list
+    if !t_hash[rect.t]?
+      t_hash[rect.t] = t_idx++
+      selected_file_list.push file_list[rect.t]
+  
+  for rect in rect_list
+    rect.t = t_hash[rect.t]
+  
+  tex_offset = 0
+  for file in selected_file_list
+    full_file = "./tex_hard/#{file}"
+    png_data = PNG.sync.read fs.readFileSync full_file
+    {
+      data
+      width
+      height
+    } = png_data
+    for x in [0 ... tex_size_x]
+      for y in [0 ... tex_size_y]
+        src_offset = 4*(x + y*width)
+        dst_offset = 4*(x + y*tex_size_x)
+        tex_buf_host[dst_offset+0] = data[src_offset+0]
+        tex_buf_host[dst_offset+1] = data[src_offset+1]
+        tex_buf_host[dst_offset+2] = data[src_offset+2]
+        tex_buf_host[dst_offset+3] = 255
+
+    await queue.waitable().enqueueWriteBuffer(image_atlas_buf_gpu, tex_offset, tex_buf_host.length, tex_buf_host).promise.then defer()
+    tex_offset += tex_buf_host.length
+  
+  p rect_list
   for rect,idx in rect_list
     rect_offset = idx*8*4
     rect_list_buf_host.writeInt32LE(rect.x, rect_offset); rect_offset += 4
