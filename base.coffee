@@ -26,6 +26,7 @@ for i in [0 ... 2 ** 16]
   break if hash[0] == 0
 
 esp_ts = Date.now() - start_ts
+p '\n'
 p "share found in #{esp_ts} ms"
 p hash
 hash_fn.dump_img()
