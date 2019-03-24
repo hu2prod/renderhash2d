@@ -22,12 +22,10 @@ image_size_byte = image_size_x*image_size_y*4
 tex_size_x = 1920
 tex_size_y = 1080
 
-rect_count = 256
+rect_count = 16
 
-# scale_x = Math.floor image_size_x/255
-# scale_y = Math.floor image_size_y/255
-scale_x = 1
-scale_y = 1
+scale_x = Math.floor image_size_x/255
+scale_y = Math.floor image_size_y/255
 
 rect_list_buf_size = rect_count*8*4
 
@@ -90,9 +88,9 @@ file_list = null
   program = ctx.createProgram fs.readFileSync "./kernel_hard.cl", 'utf-8'
   await program.build('').then defer()
   build_status = program.getBuildStatus gpu
+  p program.getBuildLog gpu
   if build_status < 0
-    build_error = program.getBuildLog gpu
-    return on_end new Error "can't build. reason: #{build_error}"
+    return on_end new Error "can't build."
   kernel_draw_call_rect_list = program.createKernel "draw_call_rect_list"
   kernel_global_size = new NDRange image_size_x*image_size_y
   kernel_local_size  = new NDRange 32
@@ -116,8 +114,8 @@ file_list = null
     msg_buf1.writeInt32LE i, 0
     scene_seed = crypto.createHash('sha256').update(msg_buf1).digest()
     rect_list.push {
-      x : scene_seed[offset++ % scene_seed.length] * scale_x
-      y : scene_seed[offset++ % scene_seed.length] * scale_y
+      x : scene_seed[offset++ % scene_seed.length]
+      y : scene_seed[offset++ % scene_seed.length]
       w : scene_seed[offset++ % scene_seed.length] * scale_x
       h : scene_seed[offset++ % scene_seed.length] * scale_y
       t : scene_seed[offset++ % scene_seed.length] % tex_count

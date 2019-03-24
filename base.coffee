@@ -23,6 +23,7 @@ for i in [0 ... 2 ** 16]
   
   msg.writeInt32BE i, 10
   await hash_fn.hash msg, defer(err, hash); throw err if err
+  p hash
   break if hash[0] == 0
 
 esp_ts = Date.now() - start_ts

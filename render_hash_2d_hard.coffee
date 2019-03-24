@@ -22,12 +22,10 @@ image_size_byte = image_size_x*image_size_y*4
 tex_size_x = 1920
 tex_size_y = 1080
 
-rect_count = 256
+rect_count = 16
 
 scale_x = Math.floor image_size_x/255
 scale_y = Math.floor image_size_y/255
-#scale_x = 1
-#scale_y = 1
 
 rect_list_buf_size = rect_count*8*4
 
@@ -156,7 +154,6 @@ tex_buf_host = null
     await queue.waitable().enqueueWriteBuffer(image_atlas_buf_gpu, tex_offset, tex_buf_host.length, tex_buf_host).promise.then defer()
     tex_offset += tex_buf_host.length
   
-  p rect_list
   for rect,idx in rect_list
     rect_offset = idx*8*4
     rect_list_buf_host.writeInt32LE(rect.x, rect_offset); rect_offset += 4
