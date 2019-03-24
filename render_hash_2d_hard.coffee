@@ -45,7 +45,7 @@ tex_buf_host = null
 ####################################################################################################
 # gpu
 ####################################################################################################
-@init = (on_end) ->
+@init = (opt, on_end) ->
   host = CLHost.createV11()
   {defs} = host.cl
 
@@ -85,8 +85,10 @@ tex_buf_host = null
   ####################################################################################################
   # kernel
   ####################################################################################################
-
-  program = ctx.createProgram fs.readFileSync "./kernel_hard.cl", 'utf-8'
+  kernel_file =  "./kernel_hard.cl"
+  if opt.plus
+    kernel_file = "./kernel_hard_plus.cl"
+  program = ctx.createProgram fs.readFileSync kernel_file, 'utf-8'
   await program.build('').then defer()
   build_status = program.getBuildStatus gpu
   p program.getBuildLog gpu

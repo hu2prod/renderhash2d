@@ -29,7 +29,7 @@ tex_count = null
 ####################################################################################################
 # gpu
 ####################################################################################################
-@init = (on_end) ->
+@init = (opt, on_end) ->
   file_list = fs.readdirSync('./tex')
   tex_count = file_list.length
   tex_size_bytes = tex_size_x*tex_size_y*4*tex_count

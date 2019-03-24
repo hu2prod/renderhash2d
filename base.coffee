@@ -1,8 +1,8 @@
 #!/usr/bin/env iced
 
-hash_fn = require('./render_hash_2d_hard')
+hash_fn = require('./render_hash_2d_hard_unpack')
 
-await hash_fn.init defer(err); throw err if err
+await hash_fn.init {plus: true}, defer(err); throw err if err
 
 msg = Buffer.alloc 80
 for i in [0 ... 80]
@@ -23,7 +23,6 @@ for i in [0 ... 2 ** 16]
   
   msg.writeInt32BE i, 10
   await hash_fn.hash msg, defer(err, hash); throw err if err
-  p hash
   break if hash[0] == 0
 
 esp_ts = Date.now() - start_ts
