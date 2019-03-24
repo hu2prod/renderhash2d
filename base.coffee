@@ -6,7 +6,7 @@ await hash_fn.init defer(err); throw err if err
 
 msg = Buffer.alloc 80
 for i in [0 ... 80]
-  msg[0] = i;
+  msg[i] = i;
 
 
 start_ts = Date.now()

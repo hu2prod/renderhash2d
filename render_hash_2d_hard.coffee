@@ -105,9 +105,8 @@ tex_buf_host = null
 @hash = (msg_buf, cb)->
   # TODO lock
   msg_buf1 = Buffer.alloc msg_buf.length + 4
-  for i in msg_buf.length
+  for i in [0 ... msg_buf.length]
     msg_buf1[i+4] = msg_buf[i]
-  
   
   offset = 0
   rect_list = []
