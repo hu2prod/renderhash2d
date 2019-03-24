@@ -112,9 +112,9 @@ kernel_local_size = null
   program = ctx.createProgram fs.readFileSync "./kernel.cl", 'utf-8'
   await program.build('').then defer()
   build_status = program.getBuildStatus gpu
+  p program.getBuildLog gpu
   if build_status < 0
-    build_error = program.getBuildLog gpu
-    return on_end new Error "can't build. reason: #{build_error}"
+    return on_end new Error "can't build."
   kernel_draw_call_rect_list = program.createKernel "draw_call_rect_list"
   kernel_global_size = new NDRange image_size_x*image_size_y
   kernel_local_size  = new NDRange 32

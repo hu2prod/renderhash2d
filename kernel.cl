@@ -28,10 +28,10 @@ __kernel void draw_call_rect_list(
 	}
 	
 	if (rect_id == -1) {
-		image_result[id].x = 128;
-		image_result[id].y = 128;
-		image_result[id].z = 128;
-		image_result[id].w = 255;
+		image_result[id].x = (unsigned char)128;
+		image_result[id].y = (unsigned char)128;
+		image_result[id].z = (unsigned char)128;
+		image_result[id].w = (unsigned char)255;
 		return;
 	}
 	int rect_offset = 8*rect_id;

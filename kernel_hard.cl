@@ -1,7 +1,7 @@
 __kernel void draw_call_rect_list(
 	__global int *rect_list,
-	__global char4 *image_atlas,
-	__global char4 *image_result,
+	__global uchar4 *image_atlas,
+	__global uchar4 *image_result,
 	const unsigned int rect_list_length,
 	const unsigned int size_x,
 	const unsigned int tex_size_x,
@@ -14,9 +14,9 @@ __kernel void draw_call_rect_list(
 	int y = id / size_x;
 	
 	int i;
-  int r = 128 << 8;
-  int g = 128 << 8;
-  int b = 128 << 8;
+  unsigned int r = 128 << 8;
+  unsigned int g = 128 << 8;
+  unsigned int b = 128 << 8;
   
 	for(i = 0;i < rect_list_length;i++){
 		int offset = i*8;
@@ -33,10 +33,10 @@ __kernel void draw_call_rect_list(
       int tex_offset_y = (y - rect_y) % tex_size_y;
       int tex_offset = tex_offset_x + tex_offset_y*tex_size_x;
       tex_offset += rect_tex_idx * tex_size_x * tex_size_y;
-      char4 rgba = image_atlas[tex_offset];
-      r = (r + rgba.x << 8) >> 1;
-      g = (g + rgba.y << 8) >> 1;
-      b = (b + rgba.z << 8) >> 1;
+      uchar4 rgba = image_atlas[tex_offset];
+      r = (r + ((int)(rgba.x) << 8)) >> 1;
+      g = (g + ((int)(rgba.y) << 8)) >> 1;
+      b = (b + ((int)(rgba.z) << 8)) >> 1;
     }
 	}
   

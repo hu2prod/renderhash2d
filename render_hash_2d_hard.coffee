@@ -24,10 +24,10 @@ tex_size_y = 1080
 
 rect_count = 256
 
-# scale_x = Math.floor image_size_x/255
-# scale_y = Math.floor image_size_y/255
-scale_x = 1
-scale_y = 1
+scale_x = Math.floor image_size_x/255
+scale_y = Math.floor image_size_y/255
+#scale_x = 1
+#scale_y = 1
 
 rect_list_buf_size = rect_count*8*4
 
@@ -42,6 +42,7 @@ kernel_draw_call_rect_list = null
 kernel_global_size = null
 kernel_local_size = null
 file_list = null
+tex_buf_host = null
 
 ####################################################################################################
 # gpu
@@ -90,9 +91,9 @@ file_list = null
   program = ctx.createProgram fs.readFileSync "./kernel_hard.cl", 'utf-8'
   await program.build('').then defer()
   build_status = program.getBuildStatus gpu
+  p program.getBuildLog gpu
   if build_status < 0
-    build_error = program.getBuildLog gpu
-    return on_end new Error "can't build. reason: #{build_error}"
+    return on_end new Error "can't build."
   kernel_draw_call_rect_list = program.createKernel "draw_call_rect_list"
   kernel_global_size = new NDRange image_size_x*image_size_y
   kernel_local_size  = new NDRange 32
@@ -116,8 +117,8 @@ file_list = null
     msg_buf1.writeInt32LE i, 0
     scene_seed = crypto.createHash('sha256').update(msg_buf1).digest()
     rect_list.push {
-      x : scene_seed[offset++ % scene_seed.length] * scale_x
-      y : scene_seed[offset++ % scene_seed.length] * scale_y
+      x : scene_seed[offset++ % scene_seed.length]
+      y : scene_seed[offset++ % scene_seed.length]
       w : scene_seed[offset++ % scene_seed.length] * scale_x
       h : scene_seed[offset++ % scene_seed.length] * scale_y
       t : scene_seed[offset++ % scene_seed.length] % tex_count
@@ -155,6 +156,7 @@ file_list = null
     await queue.waitable().enqueueWriteBuffer(image_atlas_buf_gpu, tex_offset, tex_buf_host.length, tex_buf_host).promise.then defer()
     tex_offset += tex_buf_host.length
   
+  p rect_list
   for rect,idx in rect_list
     rect_offset = idx*8*4
     rect_list_buf_host.writeInt32LE(rect.x, rect_offset); rect_offset += 4
