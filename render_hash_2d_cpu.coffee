@@ -116,10 +116,10 @@ tex_count = null
         rect_id = if (fit_x && fit_y) then i else rect_id
       
       if rect_id == -1
-        # image_result.writeUInt8(128, 4*id)
-        # image_result.writeUInt8(128, 4*id + 1)
-        # image_result.writeUInt8(128, 4*id + 2)
-        # image_result.writeUInt8(255, 4*id + 3)
+        image_result.writeUInt8(128, 4*id)
+        image_result.writeUInt8(128, 4*id + 1)
+        image_result.writeUInt8(128, 4*id + 2)
+        image_result.writeUInt8(255, 4*id + 3)
         continue
       
       rect_x = rect_list[rect_id].x;
