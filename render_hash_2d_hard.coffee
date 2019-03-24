@@ -40,7 +40,8 @@ tex_count = null
 queue = null
 kernel_draw_call_rect_list = null
 kernel_global_size = null
-kernel_local_size = null 
+kernel_local_size = null
+file_list = null
 
 ####################################################################################################
 # gpu
@@ -135,7 +136,7 @@ kernel_local_size = null
   
   tex_offset = 0
   for file in selected_file_list
-    full_file = "./tex/#{file}"
+    full_file = "./tex_hard/#{file}"
     png_data = PNG.sync.read fs.readFileSync full_file
     {
       data
