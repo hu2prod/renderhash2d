@@ -1,5 +1,5 @@
 #!/usr/bin/env iced
-fs = require 'fs'
+require 'fy'
 fs = require 'fs'
 {PNG} = require 'pngjs'
 # ###################################################################################################
@@ -14,10 +14,11 @@ tex_size_y = 1080
 tex_buf_host = Buffer.alloc tex_size_x*tex_size_y*4
 file_list = fs.readdirSync('./tex_hard')
 
-for file in selected_file_list
+for file, idx in file_list
+  p "[#{idx+1}/#{file_list.length}] #{file}"
   src_file = "./tex_hard/#{file}"
   dst_file = "./tex_hard_unpack/#{file}.unpack"
-  png_data = PNG.sync.read fs.readFileSync full_file
+  png_data = PNG.sync.read fs.readFileSync src_file
   {
     data
     width
