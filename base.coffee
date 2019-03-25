@@ -1,8 +1,17 @@
 #!/usr/bin/env iced
+argv = require('minimist')(process.argv.slice(2))
 
-hash_fn = require('./render_hash_2d_hard_unpack')
+switch argv.fn
+  when 'cpu'
+    hash_fn = require('./render_hash_2d_cpu')
+  when 'hard'
+    hash_fn = require('./render_hash_2d_hard')
+  when 'hard_unpack'
+    hash_fn = require('./render_hash_2d_hard_unpack')
+  else
+    hash_fn = require('./render_hash_2d')
 
-await hash_fn.init {plus: true}, defer(err); throw err if err
+await hash_fn.init {plus: argv.plus}, defer(err); throw err if err
 
 msg = Buffer.alloc 80
 for i in [0 ... 80]
