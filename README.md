@@ -5,9 +5,8 @@ done as part of 6th hackathon http://blockchainua-hackathon.com/
 
 # How to launch
 
-Assembled for ubuntu
+Assembled for ubuntu but will also work with any other distribution after `npm i` and probably even on windows (visual studio needed for compile)
 
- *
  * `git clone https://github.com/hu2prod/renderhash2d`
  * `cd renderhash2d`
  * install [nvm](https://github.com/creationix/nvm)
