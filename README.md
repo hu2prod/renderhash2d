@@ -35,6 +35,10 @@ unpack is only optimized version when you don't need decode png to texture atlas
  * `./tex_hard_unpack.coffee`
  * wait
  * `./base.coffee --fn=gpu_hard_unpack`
+
+## How to launch renderhash_2d_hard_plus or renderhash_2d_hard_plus_unpack
+ * `./base.coffee --plus --fn=gpu_hard`
+ * `./base.coffee --plus --fn=gpu_hard_unpack`
    
 # Throubleshooting
 ## gpu code doesn't work
