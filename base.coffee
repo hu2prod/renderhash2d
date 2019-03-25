@@ -2,14 +2,14 @@
 argv = require('minimist')(process.argv.slice(2))
 
 switch argv.fn
-  when 'cpu'
-    hash_fn = require('./render_hash_2d_cpu')
-  when 'hard'
+  when 'gpu'
+    hash_fn = require('./render_hash_2d')
+  when 'gpu_hard'
     hash_fn = require('./render_hash_2d_hard')
-  when 'hard_unpack'
+  when 'gpu_hard_unpack'
     hash_fn = require('./render_hash_2d_hard_unpack')
   else
-    hash_fn = require('./render_hash_2d')
+    hash_fn = require('./render_hash_2d_cpu')
 
 await hash_fn.init {plus: argv.plus}, defer(err); throw err if err
 
