@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "fy": "github:hu2prod/fy",
-    "minimist": "^1.2.0",
+    "minimist": "^1.2.6",
     "nooocl": "^0.12.5",
     "pngjs": "^3.4.0"
   }
